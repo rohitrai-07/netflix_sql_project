@@ -74,3 +74,57 @@ FROM (
 ) AS ranked
 WHERE ranking = 1;
 ```
+
+### 3.List All Movies Released in the Year 2020
+
+```sql
+SELECT 
+    type, 
+    title,
+    release_year 
+FROM netflix 
+WHERE release_year = 2020 AND type = 'Movie';
+```
+
+### 4.Find Top 5 Countries with the Most Content
+
+```sql
+SELECT 
+    TRIM(UNNEST(STRING_TO_ARRAY(country, ','))) AS country, 
+    COUNT(*) AS total_count
+FROM netflix
+GROUP BY country
+ORDER BY total_count DESC
+LIMIT 5;
+```
+
+### 5.Identify the Longest Movie on Netflix
+
+```sql
+SELECT
+    type,
+    title,
+    duration,
+    SPLIT_PART(duration, ' ', 1)::INT AS minutes
+FROM netflix
+WHERE type = 'Movie' AND duration ILIKE '%min%'
+ORDER BY minutes DESC
+LIMIT 1;
+```
+
+### 6. Find All Content Added in the Last 5 Years
+
+```sql
+SELECT * 
+FROM netflix
+WHERE TO_DATE(date_added, 'Month DD, YYYY') >= CURRENT_DATE - INTERVAL '5 years';
+```
+
+### 7.Find All Movies or TV Shows Directed by Rajiv Chilaka
+
+``sql
+SELECT * 
+FROM netflix 
+WHERE director ILIKE '%Rajiv Chilaka%';
+```
+
