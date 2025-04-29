@@ -122,9 +122,123 @@ WHERE TO_DATE(date_added, 'Month DD, YYYY') >= CURRENT_DATE - INTERVAL '5 years'
 
 ### 7.Find All Movies or TV Shows Directed by Rajiv Chilaka
 
-``sql
+
+```sql
 SELECT * 
 FROM netflix 
 WHERE director ILIKE '%Rajiv Chilaka%';
 ```
+
+### 8.List All TV Shows With More Than 5 Seasons
+
+```sql
+SELECT * 
+FROM netflix
+WHERE type = 'TV Show'
+  AND SPLIT_PART(duration, ' ', 1)::INT > 5;
+```
+
+### 9. Count the Number of Content Items in Each Genre
+
+```sql
+SELECT 
+    TRIM(UNNEST(STRING_TO_ARRAY(listed_in, ','))) AS genre,
+    COUNT(*) AS genre_count
+FROM netflix
+GROUP BY genre
+ORDER BY genre_count DESC;
+```
+
+### 10.Find Each Year and the Average Percentage of Content Released in India
+
+```sql
+SELECT 
+    EXTRACT(YEAR FROM TO_DATE(date_added, 'Month DD, YYYY')) AS year,
+    COUNT(*) AS total_count,
+    ROUND(COUNT(*)::NUMERIC / (SELECT COUNT(*) FROM netflix WHERE country ILIKE '%India%') * 100, 2) AS avg_content_percent
+FROM netflix
+WHERE country ILIKE '%India%'
+GROUP BY year
+ORDER BY avg_content_percent DESC
+LIMIT 5;
+```
+
+### 11.List All Movies That Are Documentaries
+
+```sql
+SELECT * 
+FROM netflix 
+WHERE listed_in ILIKE '%Documentaries%' AND type = 'Movie';
+```
+
+### 12. Find All Content Without a Director
+
+```sql
+SELECT * 
+FROM netflix
+WHERE director IS NULL OR director = '';
+```
+
+### 13. Count How Many Movies Salman Khan Appeared In During the Last 15 Years
+
+```sql
+SELECT * 
+FROM netflix
+WHERE casts ILIKE '%Salman Khan%'
+  AND release_year >= EXTRACT(YEAR FROM CURRENT_DATE) - 15;
+```
+
+### 14. Find Top 10 Actors Who Appeared the Most in Indian Movies
+
+```sql
+SELECT 
+    TRIM(UNNEST(STRING_TO_ARRAY(casts, ','))) AS actor,
+    COUNT(*) AS total_movies
+FROM netflix
+WHERE country ILIKE '%India%' AND type = 'Movie'
+GROUP BY actor
+ORDER BY total_movies DESC
+LIMIT 10;
+```
+
+
+### 15.Categorize Content Based on Presence of 'Kill' or 'Violence' in Description
+
+
+```sql
+WITH categorized AS (
+    SELECT *,
+        CASE 
+            WHEN description ILIKE '%kill%' OR description ILIKE '%violence%' THEN 'Bad_Content'
+            ELSE 'Good_Content'
+        END AS category
+    FROM netflix
+)
+SELECT 
+    category,
+    COUNT(*) AS total_content
+FROM categorized
+GROUP BY category;
+```
+
+
+### Tools Used
+
+* PostgreSQL / SQL
+
+* Kaggle for dataset
+
+* GitHub for version control
+
+### Insights & Learnings
+
+* Netflix hosts significantly more movies than TV shows.
+
+* The most common rating differs between content types.
+
+* Indian content is consistently released every year with noticeable patterns.
+
+* Metadata quality (like missing directors) needs cleaning for analysis.
+
+* Keyword-based classification can reveal thematic trends.
 
