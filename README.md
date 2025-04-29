@@ -57,3 +57,20 @@ SELECT
 FROM netflix 
 GROUP BY type;
 ```
+### 2.Find the Most Common Ratings for Movies and TV Shows
+
+```sql
+SELECT 
+    type,
+    rating
+FROM (
+    SELECT 
+        type, 
+        rating, 
+        COUNT(*) AS count_rating,
+        RANK() OVER (PARTITION BY type ORDER BY COUNT(*) DESC) AS ranking
+    FROM netflix
+    GROUP BY type, rating
+) AS ranked
+WHERE ranking = 1;
+```
